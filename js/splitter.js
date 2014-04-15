@@ -5,6 +5,7 @@ angular.module('bgDirectives', [])
             replace: true,
             transclude: true,
             scope: {
+                splitterId: '@',
                 orientation: '@',
                 onChange: '&onChange'
             },
@@ -18,6 +19,7 @@ angular.module('bgDirectives', [])
                     $scope.panes.push(pane);
                     return $scope.panes.length;
                 };
+
             },
             link: function(scope, element, attrs) {
                 var handler = angular.element('<div class="split-handler"></div>');
@@ -27,8 +29,51 @@ angular.module('bgDirectives', [])
                 var pane1Min = pane1.minSize || 0;
                 var pane2Min = pane2.minSize || 0;
                 var drag = false;
+                var lastPos = null;
 
                 pane1.elem.after(handler);
+
+                var getSavedPosition = function() {
+                    if(!!localStorage && !!scope.splitterId) {
+                        var savedPos = localStorage.getItem(scope.splitterId);
+                        var pos = parseInt(savedPos);
+                        return isNaN(pos) ? null : pos;
+                    }
+                    return null;
+                };
+
+                var savePosition = function (pos) {
+                    if(!!localStorage && !!scope.splitterId) {
+                        localStorage.setItem(scope.splitterId, pos);
+                    }
+                };
+
+                var setPosition = function(pos) {
+                    var bounds = element[0].getBoundingClientRect();
+
+                    if (vertical) {
+                        var height = bounds.bottom - bounds.top;
+                        if (pos < pane1Min) pos = pane1Min;
+                        if (height - pos < pane2Min) pos = height - pane2Min;
+
+                        handler.css('top', pos + 'px');
+                        pane1.elem.css('height', pos + 'px');
+                        pane2.elem.css('top', pos + 'px');
+
+                    } else {
+                        var width = bounds.right - bounds.left;
+                        if (pos < pane1Min) pos = pane1Min;
+                        if (width - pos < pane2Min) pos = width - pane2Min;
+
+                        handler.css('left', pos + 'px');
+                        pane1.elem.css('width', pos + 'px');
+                        pane2.elem.css('left', pos + 'px');
+                    }
+                    lastPos = pos;
+                    if(scope.onChange) {
+                        scope.onChange();
+                    }
+                };
 
                 element.bind('mousemove', function (ev) {
                     if (!drag) return;
@@ -37,29 +82,14 @@ angular.module('bgDirectives', [])
                     var pos = 0;
 
                     if (vertical) {
-
-                        var height = bounds.bottom - bounds.top;
                         pos = ev.clientY - bounds.top;
 
-                        if (pos < pane1Min) return;
-                        if (height - pos < pane2Min) return;
-
-                        handler.css('top', pos + 'px');
-                        pane1.elem.css('height', pos + 'px');
-                        pane2.elem.css('top', pos + 'px');
-
                     } else {
-
-                        var width = bounds.right - bounds.left;
                         pos = ev.clientX - bounds.left;
-
-                        if (pos < pane1Min) return;
-                        if (width - pos < pane2Min) return;
-
-                        handler.css('left', pos + 'px');
-                        pane1.elem.css('width', pos + 'px');
-                        pane2.elem.css('left', pos + 'px');
                     }
+
+                    setPosition(pos);
+
                     if(scope.onChange) {
                         scope.onChange();
                     }
@@ -71,8 +101,12 @@ angular.module('bgDirectives', [])
                 });
 
                 angular.element(document).bind('mouseup', function (ev) {
+                    savePosition(lastPos);
                     drag = false;
                 });
+
+                lastPos = getSavedPosition();
+                if(lastPos != null) setPosition(lastPos);
             }
         };
     })
