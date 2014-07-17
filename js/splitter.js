@@ -1,5 +1,5 @@
 angular.module('bgDirectives', [])
-    .directive('bgSplitter', function() {
+    .directive('bgSplitter', function($timeout) {
         return {
             restrict: 'E',
             replace: true,
@@ -71,7 +71,7 @@ angular.module('bgDirectives', [])
                     }
                     lastPos = pos;
                     if(scope.onChange) {
-                        scope.onChange();
+                        $timeout(scope.onChange);
                     }
                 };
 
@@ -91,7 +91,7 @@ angular.module('bgDirectives', [])
                     setPosition(pos);
 
                     if(scope.onChange) {
-                        scope.onChange();
+                        $timeout(scope.onChange);
                     }
                 });
 
