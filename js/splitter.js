@@ -105,8 +105,10 @@ angular.module('bgDirectives', [])
                     drag = false;
                 });
 
-                lastPos = getSavedPosition();
-                if(lastPos != null) setPosition(lastPos);
+                $timeout(function() {
+                    lastPos = getSavedPosition();
+                    if(lastPos != null) setPosition(lastPos);
+                });
             }
         };
     })
