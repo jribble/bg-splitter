@@ -43,7 +43,7 @@ angular.module('bgDirectives', [])
                 };
 
                 var savePosition = function (pos) {
-                    if(!!localStorage && !!scope.splitterId) {
+                    if(!!localStorage && !!scope.splitterId && $(element).is(':visible')) {
                         localStorage.setItem(scope.splitterId, pos);
                     }
                 };
@@ -105,10 +105,26 @@ angular.module('bgDirectives', [])
                     drag = false;
                 });
 
-                $timeout(function() {
-                    lastPos = getSavedPosition();
-                    if(lastPos != null) setPosition(lastPos);
-                });
+                function loadSavedPosition () {
+                    if($(element).is(':visible')) {
+                        lastPos = getSavedPosition();
+                        if (lastPos === null) {
+                            var bounds = element[0].getBoundingClientRect();
+                            lastPos = (bounds.bottom - bounds.top) / 2;
+                        }
+
+                        setPosition(lastPos);
+                    }
+                }
+
+                $timeout(loadSavedPosition);
+
+                scope.$watch(function() {
+                        return $(element).is(':visible');
+                    },
+                    function() {
+                        if($(element).is(':visible')) loadSavedPosition();
+                    });
             }
         };
     })
