@@ -123,7 +123,7 @@ angular.module('bgDirectives', [])
                         return $(element).is(':visible');
                     },
                     function() {
-                        if($(element).is(':visible')) loadSavedPosition();
+                        if($(element).is(':visible')) $timeout(loadSavedPosition());
                     });
             }
         };
