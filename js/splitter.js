@@ -32,15 +32,17 @@ angular.module('bgDirectives', [])
         $scope.handler.hide();
         if (vertical) {
           var height = bounds.bottom - bounds.top;
-          visiblePane.elem.css('top', '0px');
           if (index === 0) {
+            visiblePane.elem.css('top', '0px');
+          } else {
             visiblePane.elem.css('height', height + 'px');
           }
 
         } else {
           var width = bounds.right - bounds.left;
-          visiblePane.elem.css('left', '0px');
           if (index === 0) {
+            visiblePane.elem.css('left', '0px');
+          } else {
             visiblePane.elem.css('width', width + 'px');
           }
         }
